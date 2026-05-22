@@ -1,6 +1,7 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* Your custom ambient glow or film grain styles can go below this */
+
 
 body {
   background-color: #070A0E;
