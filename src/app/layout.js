@@ -7,14 +7,17 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="h-full bg-[#070A0E]">
-      <body className="relative min-h-screen overflow-x-hidden antialiased">
-        {/* Visual atmospheric components rendering on every route */}
-        <div className="absolute inset-0 ambient-glow pointer-events-none z-0" />
-        <div className="absolute inset-0 bg-grain pointer-events-none z-0" />
+    <html lang="en" className="h-full bg-[#090b0e]">
+      {/* Apply the custom CSS classes from your globals.css right here */}
+      <body className="relative min-h-screen overflow-x-hidden antialiased voxlab-gradient-bg">
+        {/* Film grain overlay */}
+        <div className="fixed inset-0 z-0 pointer-events-none voxlab-film-noise" />
+        
+        {/* Page Content */}
         <div className="relative z-10">
           {children}
         </div>
       </body>
     </html>
-  );}
+  );
+}
