@@ -44,3 +44,22 @@ body {
   opacity: 0.055;
   mix-blend-mode: overlay;
 }
+
+.field {
+  width: 100%;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(33, 44, 59, 0.6);
+  background: rgba(18, 24, 32, 0.8);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  color: white;
+  outline: none;
+}
+
+.field::placeholder {
+  color: rgb(71, 85, 105);
+}
+
+.field:focus {
+  border-color: rgba(245, 158, 11, 0.5);
+}

@@ -7,14 +7,17 @@ import CampaignOperations from '@/components/CampaignOperations';
 import LarkIntegration from '@/components/LarkIntegration';
 import QuotationBuilder from '@/components/QuotationBuilder';
 import ClaimsLedger from '@/components/ClaimsLedger';
+import ServicesManagement from '@/components/ServicesManagement';
+import InternalManagement from '@/components/InternalManagement';
+import { SERVICE_CATALOG } from '@/data/serviceCatalog';
 
 // ── Shared mock repositories ──────────────────────────────────────────────────
 
 export const INITIAL_TEAM = [
-  { id: 't1', name: 'Alex Mercer',   role: 'Creative Director',  capacity: 85 },
-  { id: 't2', name: 'Sarah Lin',     role: 'Account Manager',    capacity: 60 },
-  { id: 't3', name: 'Mark Vance',    role: 'Strategist',         capacity: 40 },
-  { id: 't4', name: 'Elena Rostova', role: 'Social Lead',        capacity: 95 },
+  { id: 't1', name: 'Alex Mercer',   role: 'Creative Director',  date_joined: '2024-01-15', capacity: 85 },
+  { id: 't2', name: 'Sarah Lin',     role: 'Account Manager',    date_joined: '2024-03-01', capacity: 60 },
+  { id: 't3', name: 'Mark Vance',    role: 'Strategist',         date_joined: '2025-02-10', capacity: 40 },
+  { id: 't4', name: 'Elena Rostova', role: 'Social Lead',        date_joined: '2025-06-18', capacity: 95 },
 ];
 
 export const INITIAL_CLIENTS = [
@@ -35,20 +38,32 @@ export const INITIAL_QUOTES = [
   {
     id: 'q1', quote_number: 'VL-2026-001', client_id: 'c2', status: 'Approved',
     created_at: '2026-04-10',
+    projectTitle: 'Carbon Negative Brand Film',
+    projectType: 'Marketing Campaign',
+    campaignPeriod: '10/04/2026 - 31/05/2026',
+    primaryPlatform: 'YouTube / Meta',
+    preparedBy: 'VOXLAB',
+    conceptDirection: 'A polished brand film system to sharpen NeoCarbon positioning and support campaign launch assets.',
     items: [
-      { description: 'Carbon Brand Film Production', qty: 1, unitPrice: 28000 },
-      { description: 'Monthly Retainer (3 months)',  qty: 3, unitPrice: 2000  },
+      { name: 'Brand Film - Full Production', description: 'Concept, pre-production, filming, colour grade, sound design, and final campaign export.', qty: 1, unit: 'Project', unitPrice: 28000, discount: 1200, remarks: 'Includes kickoff and direction deck' },
+      { name: 'Monthly Account Retainer', description: 'Weekly check-ins, campaign oversight, reporting, and strategic advisory.', qty: 3, unit: 'Month', unitPrice: 2000, discount: 0, remarks: 'April to June retainer' },
     ],
-    discount: 5, tax: 8,
+    tax: 0,
   },
   {
     id: 'q2', quote_number: 'VL-2026-002', client_id: 'c1', status: 'Pending',
     created_at: '2026-05-02',
+    projectTitle: 'Aetheris Performance Creative Sprint',
+    projectType: 'Performance Marketing',
+    campaignPeriod: '02/05/2026 - 30/06/2026',
+    primaryPlatform: 'Meta / TikTok',
+    preparedBy: 'VOXLAB',
+    conceptDirection: 'A short sprint to test campaign messaging, refresh ad creative, and improve performance learning velocity.',
     items: [
-      { description: 'Performance Ad Creative Assets (x15)', qty: 1, unitPrice: 4500 },
-      { description: 'Media Buy Management (Meta / TikTok)',  qty: 1, unitPrice: 3000 },
+      { name: 'Performance Creative Assets', description: 'Production of static and short-video ad variants for platform testing.', qty: 1, unit: 'Batch', unitPrice: 4500, discount: 0, remarks: '15 creative variants' },
+      { name: 'Meta Ads Management', description: 'Campaign setup, audience testing, optimisation, budget pacing, and reporting.', qty: 1, unit: 'Month', unitPrice: 3000, discount: 0, remarks: 'Ad spend excluded unless stated' },
     ],
-    discount: 0, tax: 8,
+    tax: 0,
   },
 ];
 
@@ -63,6 +78,8 @@ export const INITIAL_CLAIMS = [
 const NAV_ITEMS = [
   { key: 'dashboard', icon: '📊', label: 'Overview Grid'       },
   { key: 'clients',   icon: '🤝', label: 'Client Management'   },
+  { key: 'services',  icon: '🧾', label: 'VOXLAB Services'      },
+  { key: 'internal',  icon: '👥', label: 'Internal Management'  },
   { key: 'campaigns', icon: '🎯', label: 'Campaign Operations' },
   { key: 'lark',      icon: '🔗', label: 'Lark Base Tunnel'    },
   { key: 'quotation', icon: '📝', label: 'Quotation Builder'   },
@@ -71,7 +88,8 @@ const NAV_ITEMS = [
 
 export default function WorkspaceDashboard() {
   const [currentTab, setCurrentTab] = useState('dashboard');
-  const [team]                       = useState(INITIAL_TEAM);
+  const [team,       setTeam]        = useState(INITIAL_TEAM);
+  const [services,   setServices]    = useState(SERVICE_CATALOG);
   const [clients,    setClients]     = useState(INITIAL_CLIENTS);
   const [campaigns,  setCampaigns]   = useState(INITIAL_CAMPAIGNS);
   const [quotes,     setQuotes]      = useState(INITIAL_QUOTES);
@@ -85,7 +103,7 @@ export default function WorkspaceDashboard() {
     setTimeout(() => setToast(''), 4000);
   };
 
-  const sharedProps = { clients, setClients, campaigns, setCampaigns, quotes, setQuotes, claims, setClaims, team, session, triggerToast };
+  const sharedProps = { clients, setClients, services, setServices, campaigns, setCampaigns, quotes, setQuotes, claims, setClaims, team, setTeam, session, triggerToast };
 
   return (
     <div className="relative min-h-screen text-slate-200 antialiased overflow-x-hidden pb-16 font-sans">
@@ -174,6 +192,8 @@ export default function WorkspaceDashboard() {
           <div className="lg:col-span-9">
             {currentTab === 'dashboard' && <OverviewDashboard  {...sharedProps} />}
             {currentTab === 'clients'   && <ClientManagement   {...sharedProps} />}
+            {currentTab === 'services'  && <ServicesManagement {...sharedProps} />}
+            {currentTab === 'internal'  && <InternalManagement {...sharedProps} />}
             {currentTab === 'campaigns' && <CampaignOperations {...sharedProps} />}
             {currentTab === 'lark'      && <LarkIntegration    {...sharedProps} />}
             {currentTab === 'quotation' && <QuotationBuilder   {...sharedProps} />}

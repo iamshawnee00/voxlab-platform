@@ -6,7 +6,9 @@ const fmt = (n) => `RM ${Number(n).toLocaleString('en-MY', { minimumFractionDigi
 
 function quoteTotals(q) {
   const sub = q.items.reduce((a, i) => a + i.qty * i.unitPrice, 0);
-  return sub * (1 - q.discount / 100) * (1 + q.tax / 100);
+  const discount = q.items.reduce((a, i) => a + (parseFloat(i.discount) || 0), 0);
+  const taxable = Math.max(0, sub - discount);
+  return taxable * (1 + ((parseFloat(q.tax) || 0) / 100));
 }
 
 export default function OverviewDashboard({ clients, campaigns, quotes, claims, team, triggerToast }) {

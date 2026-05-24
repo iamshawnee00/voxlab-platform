@@ -4,13 +4,12 @@ import React from 'react';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import QuotePDF from './QuotePDF';
 
-/**
- * Thin wrapper around PDFDownloadLink so we can dynamically import this entire
- * module (including @react-pdf/renderer) with { ssr: false } in
- * QuotationBuilder without touching the rest of the component tree.
- */
 export default function DownloadQuotePDF({ quote, client, projectTitle }) {
-  const filename = `${quote.quote_number} — VOXLAB Quotation.pdf`;
+  const version = quote.version ? `-V${quote.version}` : '';
+  const safeClient = (client?.name || 'Client')
+    .replace(/[^a-z0-9]+/gi, '-')
+    .replace(/^-|-$/g, '');
+  const filename = `${quote.quote_number}${version}-VOXLAB-Quotation-${safeClient}.pdf`;
 
   return (
     <PDFDownloadLink
@@ -30,11 +29,11 @@ export default function DownloadQuotePDF({ quote, client, projectTitle }) {
             error
               ? 'bg-rose-500/10 border border-rose-500/30 text-rose-400'
               : loading
-              ? 'bg-[#121820]/80 border border-[#212C3B]/60 text-slate-500 animate-pulse'
-              : 'bg-gradient-to-r from-amber-500 to-yellow-600 text-black hover:brightness-110'
+                ? 'bg-[#121820]/80 border border-[#212C3B]/60 text-slate-500 animate-pulse'
+                : 'bg-gradient-to-r from-amber-500 to-yellow-600 text-black hover:brightness-110'
           }`}
         >
-          {error ? '✕ PDF Error' : loading ? 'Building PDF…' : '↓ Download PDF'}
+          {error ? 'PDF Error' : loading ? 'Building PDF...' : 'Download PDF'}
         </span>
       )}
     </PDFDownloadLink>
