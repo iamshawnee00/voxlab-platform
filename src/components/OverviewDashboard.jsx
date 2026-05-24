@@ -34,7 +34,7 @@ export default function OverviewDashboard({ clients, campaigns, quotes, claims, 
 
   // Pending claims
   const pendingClaimsTotal = useMemo(
-    () => claims.filter(c => !c.sheet_logged).reduce((a, c) => a + c.amount, 0),
+    () => claims.filter(c => !c.sheet_logged).reduce((a, c) => a + (c.amount_myr || c.amount || 0), 0),
     [claims]
   );
 
