@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { SERVICE_CATEGORIES } from '@/data/serviceCatalog';
+import Modal from './Modal';
 
 const emptyService = {
   name: '',
@@ -22,6 +23,7 @@ export default function ServicesManagement({ services, setServices, triggerToast
   const [editingId, setEditingId] = useState(null);
   const [category, setCategory] = useState('All');
   const [search, setSearch] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
 
   const filteredServices = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -39,6 +41,7 @@ export default function ServicesManagement({ services, setServices, triggerToast
   const resetForm = () => {
     setForm(emptyService);
     setEditingId(null);
+    setModalOpen(false);
   };
 
   const updateForm = (field, value) => {
@@ -81,6 +84,7 @@ export default function ServicesManagement({ services, setServices, triggerToast
 
   const editService = (service) => {
     setEditingId(service.id);
+    setModalOpen(true);
     setForm({
       name: service.name,
       category: service.category,
@@ -110,9 +114,13 @@ export default function ServicesManagement({ services, setServices, triggerToast
           <p className="text-2xl font-black text-amber-400">{services.length}</p>
           <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Services</p>
         </div>
+        <button onClick={() => { setEditingId(null); setForm(emptyService); setModalOpen(true); }} className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-black px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors">
+          <PlusIcon /> Add Service
+        </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-[#0D1219]/90 border border-[#1C2634]/60 p-5 rounded-xl backdrop-blur-md space-y-4">
+      <Modal open={modalOpen} onClose={resetForm} eyebrow="VOXLAB Services" title={editingId ? 'Edit Service' : 'Add Service'}>
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex items-center justify-between gap-3">
           <span className="text-xs font-black uppercase text-amber-500 tracking-widest font-mono">
             {editingId ? 'Edit Service' : 'Create Service'}
@@ -187,6 +195,7 @@ export default function ServicesManagement({ services, setServices, triggerToast
           {editingId ? 'Save Service' : 'Add Service'}
         </button>
       </form>
+      </Modal>
 
       <div className="bg-[#0B0F15]/85 border border-[#1A2430]/60 rounded-xl overflow-hidden backdrop-blur-md">
         <div className="p-4 border-b border-[#1C2634] flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
@@ -242,5 +251,14 @@ export default function ServicesManagement({ services, setServices, triggerToast
         </table>
       </div>
     </div>
+  );
+}
+
+function PlusIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </svg>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Modal from './Modal';
 
 const STATUS_STYLES = {
   Active:     'text-emerald-400 border-emerald-500/20 bg-emerald-500/10',
@@ -22,6 +23,7 @@ export default function ClientManagement({ clients, setClients, triggerToast }) 
   const [budget,   setBudget]   = useState('');
   const [status,   setStatus]   = useState('Onboarding');
   const [industry, setIndustry] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
 
   const handleAdd = (e) => {
     e.preventDefault();
@@ -38,18 +40,25 @@ export default function ClientManagement({ clients, setClients, triggerToast }) 
     };
     setClients(prev => [...prev, client]);
     setName(''); setRep(''); setBudget(''); setIndustry('');
+    setModalOpen(false);
     triggerToast(`Client added: ${client.name}`);
   };
 
   return (
     <div className="space-y-6">
 
-      <div className="bg-[#0B0F15]/85 border border-[#1A2430]/60 p-6 rounded-xl backdrop-blur-md">
-        <h2 className="text-xl font-black uppercase text-white tracking-wider">CLIENT PORTFOLIO</h2>
-        <p className="text-xs text-slate-400 mt-1">Manage partner brand accounts and their workspace records.</p>
+      <div className="bg-[#0B0F15]/85 border border-[#1A2430]/60 p-6 rounded-xl backdrop-blur-md flex items-center justify-between gap-4">
+        <div>
+          <h2 className="text-xl font-black uppercase text-white tracking-wider">CLIENT PORTFOLIO</h2>
+          <p className="text-xs text-slate-400 mt-1">Manage partner brand accounts and their workspace records.</p>
+        </div>
+        <button onClick={() => setModalOpen(true)} className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-black px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors">
+          <PlusIcon /> Add Client
+        </button>
       </div>
 
-      <form onSubmit={handleAdd} className="bg-[#0D1219]/90 border border-[#1C2634]/60 p-5 rounded-xl backdrop-blur-md">
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} eyebrow="Client Management" title="Add Client">
+      <form onSubmit={handleAdd} className="space-y-4">
         <span className="text-xs font-black uppercase text-amber-500 tracking-widest block mb-4 font-mono">Register New Account</span>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
@@ -79,6 +88,7 @@ export default function ClientManagement({ clients, setClients, triggerToast }) 
           Provision Account
         </button>
       </form>
+      </Modal>
 
       <div className="bg-[#0B0F15]/85 border border-[#1A2430]/60 rounded-xl overflow-hidden shadow-2xl backdrop-blur-md">
         <table className="w-full text-left border-collapse text-xs">
@@ -117,5 +127,14 @@ export default function ClientManagement({ clients, setClients, triggerToast }) 
       </div>
 
     </div>
+  );
+}
+
+function PlusIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </svg>
   );
 }

@@ -78,18 +78,19 @@ export const INITIAL_CLAIMS = [
 ];
 
 const NAV_ITEMS = [
-  { key: 'dashboard', code: 'OV', label: 'Overview Grid', sub: 'Agency pulse' },
-  { key: 'clients', code: 'CL', label: 'Client Management', sub: 'Accounts' },
-  { key: 'services', code: 'SV', label: 'VOXLAB Services', sub: 'Rate card' },
-  { key: 'internal', code: 'TM', label: 'Internal Management', sub: 'Personnel' },
-  { key: 'campaigns', code: 'CP', label: 'Campaign Operations', sub: 'Timeline' },
-  { key: 'lark', code: 'LK', label: 'Lark Base Tunnel', sub: 'Sync' },
-  { key: 'quotation', code: 'QT', label: 'Quotation Builder', sub: 'Proposals' },
-  { key: 'claims', code: 'EX', label: 'Claims Ledger', sub: 'Expenses' },
+  { key: 'dashboard', icon: 'dashboard', label: 'Overview Grid', sub: 'Agency pulse' },
+  { key: 'clients', icon: 'clients', label: 'Client Management', sub: 'Accounts' },
+  { key: 'services', icon: 'services', label: 'VOXLAB Services', sub: 'Rate card' },
+  { key: 'internal', icon: 'team', label: 'Internal Management', sub: 'Personnel' },
+  { key: 'campaigns', icon: 'campaigns', label: 'Campaign Operations', sub: 'Timeline' },
+  { key: 'lark', icon: 'sync', label: 'Lark Base Tunnel', sub: 'Sync' },
+  { key: 'quotation', icon: 'quotes', label: 'Quotation Builder', sub: 'Proposals' },
+  { key: 'claims', icon: 'claims', label: 'Claims Ledger', sub: 'Expenses' },
 ];
 
 export default function WorkspaceDashboard() {
   const [currentTab, setCurrentTab] = useState('dashboard');
+  const [theme, setTheme] = useState('dark');
   const [team, setTeam] = useState(INITIAL_TEAM);
   const [services, setServices] = useState(SERVICE_CATALOG);
   const [clients, setClients] = useState(INITIAL_CLIENTS);
@@ -130,17 +131,24 @@ export default function WorkspaceDashboard() {
   };
 
   const activePanel = NAV_ITEMS.find((item) => item.key === currentTab) ?? NAV_ITEMS[0];
+  const isLight = theme === 'light';
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden text-slate-200 antialiased">
+    <div className={`theme-${theme} relative min-h-screen overflow-x-hidden antialiased ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
       <div
-        className="fixed inset-0 z-0 pointer-events-none bg-[#090b0e]"
+        className={`fixed inset-0 z-0 pointer-events-none ${isLight ? 'bg-[#f7f3ea]' : 'bg-[#090b0e]'}`}
         style={{
-          backgroundImage: `
-            radial-gradient(circle at 12% 15%, rgba(226,149,71,0.28) 0%, rgba(226,149,71,0.08) 35%, transparent 70%),
-            radial-gradient(circle at 45% 10%, rgba(234,179,8,0.16) 0%, rgba(234,179,8,0.04) 40%, transparent 75%),
-            radial-gradient(circle at 85% 25%, rgba(217,70,239,0.14) 0%, rgba(139,92,246,0.04) 35%, transparent 75%),
-            linear-gradient(180deg, rgba(9,11,14,0.2) 0%, rgba(9,11,14,0.78) 58%, rgba(9,11,14,0.96) 100%)`,
+          backgroundImage: isLight
+            ? `
+              radial-gradient(circle at 12% 15%, rgba(226,149,71,0.32) 0%, rgba(226,149,71,0.12) 34%, transparent 70%),
+              radial-gradient(circle at 45% 10%, rgba(234,179,8,0.2) 0%, rgba(234,179,8,0.08) 40%, transparent 75%),
+              radial-gradient(circle at 85% 25%, rgba(217,70,239,0.12) 0%, rgba(139,92,246,0.05) 35%, transparent 75%),
+              linear-gradient(180deg, rgba(255,251,242,0.25) 0%, rgba(248,244,236,0.86) 58%, rgba(247,243,234,0.98) 100%)`
+            : `
+              radial-gradient(circle at 12% 15%, rgba(226,149,71,0.28) 0%, rgba(226,149,71,0.08) 35%, transparent 70%),
+              radial-gradient(circle at 45% 10%, rgba(234,179,8,0.16) 0%, rgba(234,179,8,0.04) 40%, transparent 75%),
+              radial-gradient(circle at 85% 25%, rgba(217,70,239,0.14) 0%, rgba(139,92,246,0.04) 35%, transparent 75%),
+              linear-gradient(180deg, rgba(9,11,14,0.2) 0%, rgba(9,11,14,0.78) 58%, rgba(9,11,14,0.96) 100%)`,
         }}
       />
 
@@ -159,24 +167,21 @@ export default function WorkspaceDashboard() {
       )}
 
       <div className="relative z-10 min-h-screen w-full px-4 py-4 sm:px-5 lg:px-6 xl:px-8">
-        <div className="grid min-h-[calc(100vh-2rem)] grid-cols-1 gap-5 lg:grid-cols-[280px_minmax(0,1fr)] xl:grid-cols-[300px_minmax(0,1fr)]">
-          <aside className="lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] lg:overflow-y-auto">
-            <div className="platform-sidebar flex h-full flex-col rounded-2xl border border-white/10 bg-[#080B10]/82 p-5 shadow-2xl shadow-black/35 backdrop-blur-xl">
-              <div className="mb-5">
-                <svg viewBox="0 0 350 75" className="h-7 w-auto fill-current text-white" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M 10 20 L 28 58 L 38 58 L 56 20 L 44 20 L 33 46 L 22 20 Z" />
-                  <path fillRule="evenodd" d="M 68 20 L 102 20 C 111 20,115 24,115 32 L 115 46 C 115 54,111 58,102 58 L 68 58 C 59 58,55 54,55 46 L 55 32 C 55 24,59 20,68 20 Z M 69 31 L 69 47 L 101 47 L 101 31 Z" />
-                  <path d="M 125 20 L 138 20 L 151 38 L 164 20 L 177 20 L 158 44 L 177 58 L 164 58 L 151 40 L 138 58 L 125 58 L 144 44 Z" />
-                  <path d="M 187 10 L 197 10 L 197 58 L 187 58 Z" />
-                  <path d="M 207 32 C 207 24,211 20,220 20 L 244 20 L 244 58 L 235 58 L 235 52 C 232 56,228 58,222 58 C 213 58,207 54,207 46 Z M 218 31 L 218 47 C 218 51,220 53,225 53 L 234 53 L 234 31 Z" />
-                  <path d="M 254 10 L 264 10 L 264 30 C 267 24,272 20,280 20 C 289 20,293 24,293 32 L 293 46 C 293 54,289 58,280 58 L 254 58 Z M 264 31 L 264 53 L 280 53 C 285 53,287 51,287 46 L 287 32 C 287 27,285 25,280 25 Z" />
-                </svg>
-                <span className="mt-2.5 block text-[8px] font-black uppercase tracking-[0.25em] text-amber-500/80">
+        <div className="min-h-[calc(100vh-2rem)]">
+          <aside className="mb-5 lg:fixed lg:left-6 lg:top-4 lg:bottom-4 lg:z-30 lg:mb-0 lg:w-[280px] xl:left-8 xl:w-[300px]">
+            <div className="platform-sidebar flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#080B10]/82 p-4 shadow-2xl shadow-black/35 backdrop-blur-xl">
+              <div className="mb-3">
+                <img
+                  src={isLight ? '/voxlab-logo-black.png' : '/voxlab-logo-white.png'}
+                  alt="VOXLAB"
+                  className="h-7 w-auto object-contain"
+                />
+                <span className="mt-2 block text-[8px] font-black uppercase tracking-[0.25em] text-amber-500/80">
                   Creative Operations System
                 </span>
               </div>
 
-              <div className="mb-5 rounded-xl border border-white/10 bg-white/[0.035] p-3.5">
+              <div className="mb-3 rounded-xl border border-white/10 bg-white/[0.035] p-3">
                 <div className="flex items-center space-x-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-600 text-xs font-black text-black shadow-lg shadow-amber-950/40">
                     {session.user.full_name.charAt(0)}
@@ -187,33 +192,33 @@ export default function WorkspaceDashboard() {
                   </div>
                 </div>
                 <div className="mt-3 flex items-center justify-between border-t border-white/10 pt-2">
-                  <span className="rounded border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 font-mono text-[9px] font-black uppercase text-amber-400">
+                  <span className="sidebar-role rounded border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 font-mono text-[9px] font-black uppercase text-amber-400">
                     {session.user.role}
                   </span>
                   <span className="font-mono text-[9px] uppercase text-emerald-400">online</span>
                 </div>
               </div>
 
-              <div className="space-y-1.5">
+              <div className="min-h-0 flex-1 space-y-1">
                 <span className="mb-2 block px-2 text-[9px] font-black uppercase tracking-widest text-slate-500">Workspace</span>
-                {NAV_ITEMS.map(({ key, code, label, sub }) => (
+                {NAV_ITEMS.map(({ key, icon, label, sub }) => (
                   <button
                     key={key}
                     onClick={() => setCurrentTab(key)}
-                    className={`group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition-all ${
+                    className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-all ${
                       currentTab === key
                         ? 'border border-amber-500/30 bg-amber-500/12 text-white shadow-lg shadow-amber-950/15'
                         : 'border border-transparent text-slate-400 hover:border-white/10 hover:bg-white/[0.035] hover:text-slate-100'
                     }`}
                   >
                     <span
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-[10px] font-black ${
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${
                         currentTab === key
                           ? 'border-amber-500/40 bg-amber-500 text-black'
                           : 'border-white/10 bg-[#111720] text-slate-500 group-hover:text-slate-200'
                       }`}
                     >
-                      {code}
+                      <NavIcon name={icon} />
                     </span>
                     <span className="min-w-0">
                       <span className="block truncate text-xs font-bold tracking-wide">{label}</span>
@@ -222,10 +227,22 @@ export default function WorkspaceDashboard() {
                   </button>
                 ))}
               </div>
+
+              <div className="mt-3 border-t border-white/10 pt-3">
+                <button
+                  onClick={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))}
+                  className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2.5 text-xs font-bold uppercase tracking-wide text-slate-300 transition-all hover:border-amber-500/30 hover:text-white"
+                >
+                  <span>{isLight ? 'Light Mode' : 'Dark Mode'}</span>
+                  <span className="relative h-5 w-10 rounded-full border border-white/10 bg-black/30">
+                    <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-amber-500 transition-transform ${isLight ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                  </span>
+                </button>
+              </div>
             </div>
           </aside>
 
-          <main className="min-w-0">
+          <main className="min-w-0 lg:pl-[300px] xl:pl-[324px]">
             <div className="mb-5 flex flex-col gap-3 rounded-2xl border border-white/10 bg-[#080B10]/72 px-5 py-4 shadow-2xl shadow-black/25 backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
                 <p className="text-[9px] font-black uppercase tracking-[0.28em] text-amber-500/80">VOXLAB Workspace</p>
@@ -253,6 +270,86 @@ export default function WorkspaceDashboard() {
       </div>
     </div>
   );
+}
+
+function NavIcon({ name }) {
+  const common = {
+    width: 16,
+    height: 16,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+  };
+
+  const paths = {
+    dashboard: (
+      <>
+        <rect x="3" y="3" width="7" height="7" rx="1.5" />
+        <rect x="14" y="3" width="7" height="7" rx="1.5" />
+        <rect x="3" y="14" width="7" height="7" rx="1.5" />
+        <rect x="14" y="14" width="7" height="7" rx="1.5" />
+      </>
+    ),
+    clients: (
+      <>
+        <path d="M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2" />
+        <circle cx="9.5" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </>
+    ),
+    services: (
+      <>
+        <path d="M4 7h16" />
+        <path d="M4 12h16" />
+        <path d="M4 17h10" />
+        <path d="M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" />
+      </>
+    ),
+    team: (
+      <>
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4 21a8 8 0 0 1 16 0" />
+      </>
+    ),
+    campaigns: (
+      <>
+        <circle cx="12" cy="12" r="8" />
+        <circle cx="12" cy="12" r="3" />
+        <path d="M12 2v4" />
+        <path d="M22 12h-4" />
+      </>
+    ),
+    sync: (
+      <>
+        <path d="M21 12a9 9 0 0 0-15-6.7L3 8" />
+        <path d="M3 3v5h5" />
+        <path d="M3 12a9 9 0 0 0 15 6.7L21 16" />
+        <path d="M16 16h5v5" />
+      </>
+    ),
+    quotes: (
+      <>
+        <path d="M7 3h8l4 4v14H7z" />
+        <path d="M15 3v5h4" />
+        <path d="M10 12h6" />
+        <path d="M10 16h6" />
+      </>
+    ),
+    claims: (
+      <>
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <path d="M7 10h10" />
+        <path d="M7 14h6" />
+        <path d="M17 14h.01" />
+      </>
+    ),
+  };
+
+  return <svg {...common}>{paths[name] ?? paths.dashboard}</svg>;
 }
 
 function HeaderMetric({ label, value }) {

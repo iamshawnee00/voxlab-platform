@@ -82,7 +82,7 @@ export default function OverviewDashboard({ clients, campaigns, quotes, claims, 
         {/* Upcoming deadlines */}
         <div className="bg-[#0B0F15]/85 border border-[#1A2430]/60 rounded-xl p-5 backdrop-blur-md">
           <div className="flex justify-between items-center border-b border-[#1C2634] pb-3 mb-4">
-            <span className="text-[10px] font-black uppercase tracking-wider text-white">UPCOMING DEADLINES (7 DAYS)</span>
+            <span className="overview-section-title text-[10px] font-black uppercase tracking-wider text-white">UPCOMING DEADLINES (7 DAYS)</span>
             <span className="text-[10px] text-amber-500 font-bold font-mono">{upcoming.length} DUE</span>
           </div>
           {upcoming.length === 0 ? (
@@ -111,7 +111,7 @@ export default function OverviewDashboard({ clients, campaigns, quotes, claims, 
         {/* Team capacity */}
         <div className="bg-[#0B0F15]/85 border border-[#1A2430]/60 rounded-xl p-5 backdrop-blur-md">
           <div className="flex justify-between items-center border-b border-[#1C2634] pb-3 mb-4">
-            <span className="text-[10px] font-black uppercase tracking-wider text-white">TEAM CAPACITY</span>
+            <span className="overview-section-title text-[10px] font-black uppercase tracking-wider text-white">TEAM CAPACITY</span>
             <span className="text-[10px] text-slate-500 font-mono uppercase">Bandwidth %</span>
           </div>
           <div className="space-y-4">
@@ -142,7 +142,7 @@ export default function OverviewDashboard({ clients, campaigns, quotes, claims, 
       {/* Active campaign progress */}
       <div className="bg-[#0B0F15]/85 border border-[#1A2430]/60 rounded-xl p-5 backdrop-blur-md">
         <div className="flex justify-between items-center border-b border-[#1C2634] pb-3 mb-4">
-          <span className="text-[10px] font-black uppercase tracking-wider text-white">ACTIVE CAMPAIGN PROGRESS</span>
+          <span className="overview-section-title text-[10px] font-black uppercase tracking-wider text-white">ACTIVE CAMPAIGN PROGRESS</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {activeCampaigns.map(cmp => {
@@ -151,7 +151,7 @@ export default function OverviewDashboard({ clients, campaigns, quotes, claims, 
               <div key={cmp.id} className="p-3 bg-[#111720]/80 border border-[#1E2A3A]/50 rounded-lg">
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <span className="text-[9px] uppercase bg-slate-800 text-slate-400 font-mono tracking-widest px-1.5 py-0.5 rounded">
+                    <span className="active-campaign-client text-[9px] uppercase bg-slate-800 text-slate-400 font-mono tracking-widest px-1.5 py-0.5 rounded">
                       {client?.name ?? '—'}
                     </span>
                     <h4 className="text-xs font-bold text-white mt-1.5">{cmp.name}</h4>

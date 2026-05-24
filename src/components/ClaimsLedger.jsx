@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
+import Modal from './Modal';
 
 const CLAIM_TYPES = ['Staff Expense', 'Client Pass-through'];
 const CURRENCIES = ['MYR', 'USD', 'SGD'];
@@ -86,6 +87,7 @@ export default function ClaimsLedger({ clients, campaigns, claims, setClaims, se
   const [selectedMonth, setSelectedMonth] = useState('2026-05');
   const [selectedDate, setSelectedDate] = useState('');
   const [syncing, setSyncing] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const availableProjects = useMemo(() => {
     if (!form.client_id) return campaigns;
@@ -220,6 +222,7 @@ export default function ClaimsLedger({ clients, campaigns, claims, setClaims, se
       conversion_attachment: '',
     }));
     setSelectedMonth(monthKey(claim.transaction_date));
+    setModalOpen(false);
     triggerToast(`Claim ${claim.claim_number} saved.`);
   };
 
@@ -245,6 +248,12 @@ export default function ClaimsLedger({ clients, campaigns, claims, setClaims, se
           <Metric label="Month Total" value={fmt(analytics.total)} />
           <Metric label="Pending" value={fmt(analytics.pendingTotal)} />
           <button
+            onClick={() => setModalOpen(true)}
+            className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-black px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors"
+          >
+            <PlusIcon /> Add Claim
+          </button>
+          <button
             onClick={pushToSheet}
             disabled={syncing}
             className="bg-gradient-to-r from-amber-500 to-yellow-600 text-black px-4 py-2 rounded-lg text-xs font-bold uppercase hover:brightness-110 transition-all disabled:opacity-60"
@@ -255,7 +264,8 @@ export default function ClaimsLedger({ clients, campaigns, claims, setClaims, se
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-        <form onSubmit={handleAdd} className="xl:col-span-4 bg-[#0D1219]/90 border border-[#1C2634]/60 p-5 rounded-xl space-y-4 backdrop-blur-md">
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)} eyebrow="Claims Ledger" title="Create Claim" width="max-w-4xl">
+        <form onSubmit={handleAdd} className="space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-xs font-black uppercase text-amber-500 block font-mono">Create Claim</span>
             <span className="text-[10px] text-slate-500 font-mono">{nextClaimNumber(claims)}</span>
@@ -328,8 +338,9 @@ export default function ClaimsLedger({ clients, campaigns, claims, setClaims, se
             Log Claim
           </button>
         </form>
+        </Modal>
 
-        <div className="xl:col-span-8 space-y-6">
+        <div className="xl:col-span-12 space-y-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <AnalyticsCard label="Claims This Month" value={analytics.count} sub={monthName(selectedMonth)} />
             <AnalyticsCard label="Pending Claims" value={analytics.pendingCount} sub={fmt(analytics.pendingTotal)} />
@@ -556,5 +567,14 @@ function AnalyticsCard({ label, value, sub }) {
       <p className="text-lg font-bold text-white mt-1 leading-tight truncate">{value}</p>
       <p className="text-[10px] text-slate-500 mt-1 truncate">{sub}</p>
     </div>
+  );
+}
+
+function PlusIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </svg>
   );
 }

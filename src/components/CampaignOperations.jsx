@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import Modal from './Modal';
 
 const STATUS_STYLES = {
   Active:    'text-emerald-400 border-emerald-500/20 bg-emerald-500/10',
@@ -28,6 +29,7 @@ function monthLabels(windowStart, count = 6) {
 
 export default function CampaignOperations({ clients, campaigns, setCampaigns, team, triggerToast }) {
   const [view, setView] = useState('gantt');
+  const [modalOpen, setModalOpen] = useState(false);
 
   // Form state
   const [cName,       setCName]       = useState('');
@@ -59,6 +61,7 @@ export default function CampaignOperations({ clients, campaigns, setCampaigns, t
     };
     setCampaigns(prev => [...prev, campaign]);
     setCName(''); setCBudget('');
+    setModalOpen(false);
     triggerToast(`Campaign launched: ${campaign.name}`);
   };
 
@@ -71,17 +74,23 @@ export default function CampaignOperations({ clients, campaigns, setCampaigns, t
           <h2 className="text-xl font-black uppercase text-white tracking-wider">CAMPAIGN OPERATIONS</h2>
           <p className="text-xs text-slate-400 mt-1">Manage timelines, assignees, and budgets across all active campaigns.</p>
         </div>
-        <div className="flex bg-[#121820]/80 p-1.5 rounded-lg border border-[#212C3B]/60">
+        <div className="flex items-center gap-3">
+        <div className="view-switcher flex bg-[#121820]/80 p-1.5 rounded-lg border border-[#212C3B]/60">
           {['list', 'gantt'].map(v => (
-            <button key={v} onClick={() => setView(v)} className={`px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider transition-all ${view === v ? 'bg-[#1F2A38] text-white' : 'text-slate-400 hover:text-slate-200'}`}>
-              {v === 'list' ? '📑 List' : '📊 Gantt'}
+            <button key={v} onClick={() => setView(v)} className={`px-3 py-1.5 rounded text-xs font-bold uppercase tracking-wider transition-all ${view === v ? 'view-switcher-active bg-[#1F2A38] text-white' : 'text-slate-400 hover:text-slate-200'}`}>
+              {v === 'list' ? 'List' : 'Gantt'}
             </button>
           ))}
+        </div>
+        <button onClick={() => setModalOpen(true)} className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-black px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors">
+          <PlusIcon /> Add Campaign
+        </button>
         </div>
       </div>
 
       {/* Add campaign form */}
-      <form onSubmit={handleAdd} className="bg-[#0D1219]/90 border border-[#1C2634]/60 p-5 rounded-xl backdrop-blur-md">
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} eyebrow="Campaign Operations" title="Add Campaign">
+      <form onSubmit={handleAdd} className="space-y-4">
         <span className="text-xs font-black uppercase text-amber-500 tracking-widest block mb-4 font-mono">Add Campaign</span>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="space-y-1">
@@ -123,6 +132,7 @@ export default function CampaignOperations({ clients, campaigns, setCampaigns, t
           Launch Campaign
         </button>
       </form>
+      </Modal>
 
       {/* Views */}
       {view === 'gantt' ? (
@@ -141,7 +151,7 @@ export default function CampaignOperations({ clients, campaigns, setCampaigns, t
               const assignee = team.find(t => t.id === cmp.assignee_id);
               const [left, width] = ganttPosition(cmp.start_date, cmp.end_date, windowStart, windowDays);
               return (
-                <div key={cmp.id} className="flex items-center hover:bg-white/[0.01]" style={{ minHeight: '56px' }}>
+                <div key={cmp.id} className="campaign-row flex items-center hover:bg-white/[0.01]" style={{ minHeight: '56px' }}>
                   <div className="w-60 flex-shrink-0 p-4 border-r border-[#1C2634]">
                     <h4 className="text-xs font-bold text-white leading-tight truncate">{cmp.name}</h4>
                     <p className="text-[10px] text-slate-500 mt-0.5 truncate">{client?.name} · {assignee?.name ?? '—'}</p>
@@ -153,7 +163,7 @@ export default function CampaignOperations({ clients, campaigns, setCampaigns, t
                           className="absolute top-0 h-full rounded bg-gradient-to-r from-amber-500/25 to-yellow-600/25 border border-amber-500/40 flex items-center px-2 overflow-hidden"
                           style={{ left: `${left}%`, width: `${Math.max(width, 2)}%` }}
                         >
-                          <span className="text-[9px] font-bold text-amber-200 truncate whitespace-nowrap">
+                          <span className="campaign-gantt-label text-[9px] font-bold text-amber-200 truncate whitespace-nowrap">
                             {cmp.progress}% · RM {cmp.budget.toLocaleString()}
                           </span>
                         </div>
@@ -216,5 +226,14 @@ export default function CampaignOperations({ clients, campaigns, setCampaigns, t
       )}
 
     </div>
+  );
+}
+
+function PlusIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </svg>
   );
 }

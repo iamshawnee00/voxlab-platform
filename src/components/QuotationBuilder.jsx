@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { SERVICE_CATEGORIES } from '@/data/serviceCatalog';
+import Modal from './Modal';
 
 const DownloadQuotePDF = dynamic(() => import('./DownloadQuotePDF'), {
   ssr: false,
@@ -372,10 +373,17 @@ export default function QuotationBuilder({ clients, services, quotes, setQuotes,
 
   if (activeView === 'edit') {
     return (
+      <Modal
+        open
+        onClose={() => setActiveView('list')}
+        eyebrow="Quotation Builder"
+        title={editingSourceId ? 'Edit Quote as New Version' : 'Create Quotation'}
+        width="max-w-7xl"
+      >
       <div className="space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <button onClick={() => setActiveView('list')} className="text-xs text-amber-500 hover:underline font-bold">
-            Back to Quote History
+            Close Quote Editor
           </button>
           <span className="text-[10px] text-slate-500 font-mono">
             {editingSourceId ? 'Saving changes as a new version' : nextQuoteNumber(quotes)}
@@ -514,6 +522,7 @@ export default function QuotationBuilder({ clients, services, quotes, setQuotes,
           </div>
         </div>
       </div>
+      </Modal>
     );
   }
 
@@ -525,7 +534,7 @@ export default function QuotationBuilder({ clients, services, quotes, setQuotes,
           <p className="text-xs text-slate-400 mt-1">Create, edit, version, approve, reject, and export VOXLAB quotations.</p>
         </div>
         <button onClick={startNewQuote} className="bg-gradient-to-r from-amber-500 to-yellow-600 text-black px-4 py-2 rounded-lg text-xs font-bold uppercase hover:brightness-110 transition-all">
-          + New Quote
+          Create Quote
         </button>
       </div>
 

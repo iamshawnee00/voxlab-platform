@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Modal from './Modal';
 
 const emptyPerson = {
   name: '',
@@ -24,10 +25,12 @@ function tenure(dateJoined) {
 export default function InternalManagement({ team, setTeam, triggerToast }) {
   const [form, setForm] = useState(emptyPerson);
   const [editingId, setEditingId] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const resetForm = () => {
     setForm(emptyPerson);
     setEditingId(null);
+    setModalOpen(false);
   };
 
   const updateForm = (field, value) => {
@@ -65,6 +68,7 @@ export default function InternalManagement({ team, setTeam, triggerToast }) {
 
   const editPerson = (person) => {
     setEditingId(person.id);
+    setModalOpen(true);
     setForm({
       name: person.name,
       role: person.role,
@@ -93,9 +97,13 @@ export default function InternalManagement({ team, setTeam, triggerToast }) {
           <p className="text-2xl font-black text-amber-400">{team.length}</p>
           <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Personnel</p>
         </div>
+        <button onClick={() => { setEditingId(null); setForm(emptyPerson); setModalOpen(true); }} className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-black px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors">
+          <PlusIcon /> Add Personnel
+        </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-[#0D1219]/90 border border-[#1C2634]/60 p-5 rounded-xl backdrop-blur-md space-y-4">
+      <Modal open={modalOpen} onClose={resetForm} eyebrow="Internal Management" title={editingId ? 'Edit Personnel' : 'Add Personnel'}>
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div className="flex items-center justify-between gap-3">
           <span className="text-xs font-black uppercase text-amber-500 tracking-widest font-mono">
             {editingId ? 'Edit Personnel' : 'Add Personnel'}
@@ -155,6 +163,7 @@ export default function InternalManagement({ team, setTeam, triggerToast }) {
           {editingId ? 'Save Personnel' : 'Add Personnel'}
         </button>
       </form>
+      </Modal>
 
       <div className="bg-[#0B0F15]/85 border border-[#1A2430]/60 rounded-xl overflow-hidden backdrop-blur-md">
         <table className="w-full text-left text-xs">
@@ -200,5 +209,14 @@ export default function InternalManagement({ team, setTeam, triggerToast }) {
         </table>
       </div>
     </div>
+  );
+}
+
+function PlusIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </svg>
   );
 }
