@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import Modal from './Modal';
+import { isAssignedCampaign, isOwnClaim } from '@/lib/permissions';
 
 const CLAIM_TYPES = ['Staff Expense', 'Client Pass-through'];
 const CURRENCIES = ['MYR', 'USD', 'SGD'];
@@ -68,7 +69,9 @@ function buildCalendarDays(month, claims) {
   return cells;
 }
 
-export default function ClaimsLedger({ clients, campaigns, claims, setClaims, session, triggerToast }) {
+export default function ClaimsLedger({ clients, campaigns, claims, setClaims, session, access, triggerToast }) {
+  const claimAccess = access?.claims ?? { create: false, edit: false, sync: false, scope: 'none' };
+  const campaignAccess = access?.campaigns ?? { scope: 'none' };
   const [form, setForm] = useState({
     type: 'Staff Expense',
     client_id: clients[0]?.id ?? '',
@@ -96,13 +99,26 @@ export default function ClaimsLedger({ clients, campaigns, claims, setClaims, se
   const [syncing, setSyncing] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
+  const visibleClaims = useMemo(
+    () => (claimAccess.scope === 'all' ? claims : claims.filter((claim) => isOwnClaim(claim, session))),
+    [claimAccess.scope, claims, session]
+  );
+
+  const visibleCampaigns = useMemo(
+    () =>
+      campaignAccess.scope === 'all'
+        ? campaigns
+        : campaigns.filter((campaign) => isAssignedCampaign(campaign, session)),
+    [campaignAccess.scope, campaigns, session]
+  );
+
   const availableProjects = useMemo(() => {
-    if (!form.client_id) return campaigns;
-    return campaigns.filter((campaign) => campaign.client_id === form.client_id);
-  }, [campaigns, form.client_id]);
+    if (!form.client_id) return visibleCampaigns;
+    return visibleCampaigns.filter((campaign) => campaign.client_id === form.client_id);
+  }, [form.client_id, visibleCampaigns]);
 
   const filteredClaims = useMemo(() => {
-    return claims.filter((claim) => {
+    return visibleClaims.filter((claim) => {
       const client = clients.find((item) => item.id === claim.client_id);
       const project = campaigns.find((item) => item.id === claim.project_id);
       const status = claim.sheet_logged ? 'Synced' : 'Pending';
@@ -125,11 +141,11 @@ export default function ClaimsLedger({ clients, campaigns, claims, setClaims, se
       const matchesDate = !selectedDate || claim.transaction_date === selectedDate;
       return matchesClaim && matchesClient && matchesCategory && matchesCurrency && matchesStatus && matchesFilterDate && matchesMonth && matchesDate;
     });
-  }, [campaigns, claims, clients, selectedDate, selectedMonth, tableFilters]);
+  }, [campaigns, clients, selectedDate, selectedMonth, tableFilters, visibleClaims]);
 
   const monthlyClaims = useMemo(
-    () => claims.filter((claim) => monthKey(claim.transaction_date) === selectedMonth),
-    [claims, selectedMonth]
+    () => visibleClaims.filter((claim) => monthKey(claim.transaction_date) === selectedMonth),
+    [selectedMonth, visibleClaims]
   );
 
   const analytics = useMemo(() => {
@@ -160,8 +176,8 @@ export default function ClaimsLedger({ clients, campaigns, claims, setClaims, se
   }, [monthlyClaims]);
 
   const calendarDays = useMemo(
-    () => buildCalendarDays(selectedMonth, claims),
-    [claims, selectedMonth]
+    () => buildCalendarDays(selectedMonth, visibleClaims),
+    [selectedMonth, visibleClaims]
   );
 
   const updateForm = (field, value) => {
@@ -214,6 +230,7 @@ export default function ClaimsLedger({ clients, campaigns, claims, setClaims, se
     const claim = {
       id: `clm-${Date.now()}`,
       claim_number: nextClaimNumber(claims),
+      user_id: session.user.id,
       profile_name: session.user.full_name,
       role: session.user.role,
       type: form.type,
@@ -271,19 +288,23 @@ export default function ClaimsLedger({ clients, campaigns, claims, setClaims, se
         <div className="flex items-center gap-3 flex-wrap">
           <Metric label="Month Total" value={fmt(analytics.total)} />
           <Metric label="Pending" value={fmt(analytics.pendingTotal)} />
-          <button
-            onClick={() => setModalOpen(true)}
-            className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-black px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors"
-          >
-            <PlusIcon /> Add Claim
-          </button>
-          <button
-            onClick={pushToSheet}
-            disabled={syncing}
-            className="bg-gradient-to-r from-amber-500 to-yellow-600 text-black px-4 py-2 rounded-lg text-xs font-bold uppercase hover:brightness-110 transition-all disabled:opacity-60"
-          >
-            {syncing ? 'Syncing...' : 'Push to Finance Sheet'}
-          </button>
+          {claimAccess.create && (
+            <button
+              onClick={() => setModalOpen(true)}
+              className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-black px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors"
+            >
+              <PlusIcon /> Add Claim
+            </button>
+          )}
+          {claimAccess.sync && (
+            <button
+              onClick={pushToSheet}
+              disabled={syncing}
+              className="bg-gradient-to-r from-amber-500 to-yellow-600 text-black px-4 py-2 rounded-lg text-xs font-bold uppercase hover:brightness-110 transition-all disabled:opacity-60"
+            >
+              {syncing ? 'Syncing...' : 'Push to Finance Sheet'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -372,7 +393,7 @@ export default function ClaimsLedger({ clients, campaigns, claims, setClaims, se
             <AnalyticsCard label="Currencies" value={analytics.currencyTotals.map((item) => item.currency).join(' / ') || '-'} sub="Original currencies used" />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,7fr)_minmax(320px,3fr)] gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,4fr)_minmax(260px,1fr)] gap-6">
             <div className="claims-calendar-panel bg-[#0B0F15]/85 border border-[#1A2430]/60 rounded-xl overflow-hidden backdrop-blur-md">
               <div className="p-4 border-b border-[#1C2634] flex items-center justify-between gap-3">
                 <div>
@@ -388,13 +409,13 @@ export default function ClaimsLedger({ clients, campaigns, claims, setClaims, se
                 ))}
               </div>
 
-              <div className="claims-calendar-grid grid grid-cols-7">
+              <div className="claims-calendar-grid grid grid-cols-7 gap-2 p-3">
                 {calendarDays.map((cell, index) => (
                   <button
                     key={cell?.date || `empty-${index}`}
                     disabled={!cell}
                     onClick={() => setSelectedDate((current) => current === cell.date ? '' : cell.date)}
-                    className={`claims-calendar-cell min-h-28 border-r border-b border-[#1C2634] last:border-r-0 p-2 text-left transition-colors ${
+                    className={`claims-calendar-cell min-h-32 rounded-lg border border-[#1C2634] p-2 text-left transition-colors ${
                       cell?.date === selectedDate ? 'bg-amber-500/10' : 'hover:bg-white/[0.025]'
                     }`}
                   >
@@ -490,7 +511,9 @@ export default function ClaimsLedger({ clients, campaigns, claims, setClaims, se
                     <th className="py-2 px-4">
                       <select value={tableFilters.client} onChange={(event) => updateTableFilter('client', event.target.value)} className="claims-filter-input field">
                         <option value="">All</option>
-                        {clients.map((client) => <option key={client.id} value={client.id}>{client.name}</option>)}
+                        {clients
+                          .filter((client) => visibleCampaigns.some((campaign) => campaign.client_id === client.id))
+                          .map((client) => <option key={client.id} value={client.id}>{client.name}</option>)}
                       </select>
                     </th>
                     <th className="py-2 px-4">

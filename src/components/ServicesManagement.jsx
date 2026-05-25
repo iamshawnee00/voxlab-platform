@@ -18,7 +18,8 @@ const fmt = (n) =>
     maximumFractionDigits: 2,
   });
 
-export default function ServicesManagement({ services, setServices, triggerToast }) {
+export default function ServicesManagement({ services, setServices, access, triggerToast }) {
+  const canEditServices = access?.services?.edit;
   const [form, setForm] = useState(emptyService);
   const [editingId, setEditingId] = useState(null);
   const [category, setCategory] = useState('All');
@@ -114,9 +115,11 @@ export default function ServicesManagement({ services, setServices, triggerToast
           <p className="text-2xl font-black text-amber-400">{services.length}</p>
           <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Services</p>
         </div>
-        <button onClick={() => { setEditingId(null); setForm(emptyService); setModalOpen(true); }} className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-black px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors">
-          <PlusIcon /> Add Service
-        </button>
+        {canEditServices && (
+          <button onClick={() => { setEditingId(null); setForm(emptyService); setModalOpen(true); }} className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-black px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors">
+            <PlusIcon /> Add Service
+          </button>
+        )}
       </div>
 
       <Modal open={modalOpen} onClose={resetForm} eyebrow="VOXLAB Services" title={editingId ? 'Edit Service' : 'Add Service'}>
@@ -224,7 +227,7 @@ export default function ServicesManagement({ services, setServices, triggerToast
               <th className="py-3 px-5">Description</th>
               <th className="py-3 px-5">UOM</th>
               <th className="py-3 px-5">Basic Price</th>
-              <th className="py-3 px-5 text-right">Actions</th>
+              {canEditServices && <th className="py-3 px-5 text-right">Actions</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-[#151D27] text-slate-300">
@@ -237,14 +240,16 @@ export default function ServicesManagement({ services, setServices, triggerToast
                 <td className="py-3.5 px-5 text-slate-400 max-w-md leading-relaxed">{service.description}</td>
                 <td className="py-3.5 px-5 font-mono text-slate-400">{service.unit}</td>
                 <td className="py-3.5 px-5 font-mono font-bold">{fmt(service.defaultPrice)}</td>
-                <td className="py-3.5 px-5 text-right whitespace-nowrap">
-                  <button onClick={() => editService(service)} className="text-[10px] text-amber-500 hover:underline font-bold uppercase mr-3">
-                    Edit
-                  </button>
-                  <button onClick={() => deleteService(service.id)} className="text-[10px] text-rose-400 hover:underline font-bold uppercase">
-                    Delete
-                  </button>
-                </td>
+                {canEditServices && (
+                  <td className="py-3.5 px-5 text-right whitespace-nowrap">
+                    <button onClick={() => editService(service)} className="text-[10px] text-amber-500 hover:underline font-bold uppercase mr-3">
+                      Edit
+                    </button>
+                    <button onClick={() => deleteService(service.id)} className="text-[10px] text-rose-400 hover:underline font-bold uppercase">
+                      Delete
+                    </button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

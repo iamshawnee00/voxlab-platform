@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import OverviewDashboard from '@/components/OverviewDashboard';
 import ClientManagement from '@/components/ClientManagement';
 import CampaignOperations from '@/components/CampaignOperations';
@@ -10,12 +10,13 @@ import ClaimsLedger from '@/components/ClaimsLedger';
 import ServicesManagement from '@/components/ServicesManagement';
 import InternalManagement from '@/components/InternalManagement';
 import { SERVICE_CATALOG } from '@/data/serviceCatalog';
+import { getAccessForGrade } from '@/lib/permissions';
 
 export const INITIAL_TEAM = [
-  { id: 't1', name: 'Alex Mercer', role: 'Creative Director', date_joined: '2024-01-15', capacity: 85 },
-  { id: 't2', name: 'Sarah Lin', role: 'Account Manager', date_joined: '2024-03-01', capacity: 60 },
-  { id: 't3', name: 'Mark Vance', role: 'Strategist', date_joined: '2025-02-10', capacity: 40 },
-  { id: 't4', name: 'Elena Rostova', role: 'Social Lead', date_joined: '2025-06-18', capacity: 95 },
+  { id: 't1', name: 'Alex Mercer', role: 'Creative Director', grade: 'G1 - Lead', date_joined: '2024-01-15', capacity: 85 },
+  { id: 't2', name: 'Sarah Lin', role: 'Account Manager', grade: 'G2 - Senior', date_joined: '2024-03-01', capacity: 60 },
+  { id: 't3', name: 'Mark Vance', role: 'Strategist', grade: 'G3 - Executive', date_joined: '2025-02-10', capacity: 40 },
+  { id: 't4', name: 'Elena Rostova', role: 'Social Lead', grade: 'G4 - Support', date_joined: '2025-06-18', capacity: 95 },
 ];
 
 export const INITIAL_CLIENTS = [
@@ -102,11 +103,20 @@ export default function WorkspaceDashboard() {
   const session = {
     user: {
       id: 'usr-admin',
+      personnel_id: 't1',
       email: 'admin@voxlab.co',
       full_name: 'Alex Mercer',
       role: 'admin',
+      grade: 'G1 - Lead',
     },
   };
+
+  const access = useMemo(() => getAccessForGrade(session.user.grade), [session.user.grade]);
+  const visibleNavItems = useMemo(
+    () => NAV_ITEMS.filter((item) => access.nav.includes(item.key)),
+    [access.nav]
+  );
+  const activeTab = access.nav.includes(currentTab) ? currentTab : 'dashboard';
 
   const triggerToast = (msg) => {
     setToast(msg);
@@ -127,23 +137,24 @@ export default function WorkspaceDashboard() {
     team,
     setTeam,
     session,
+    access,
     triggerToast,
   };
 
-  const activePanel = NAV_ITEMS.find((item) => item.key === currentTab) ?? NAV_ITEMS[0];
+  const activePanel = NAV_ITEMS.find((item) => item.key === activeTab) ?? NAV_ITEMS[0];
   const isLight = theme === 'light';
 
   return (
     <div className={`theme-${theme} relative min-h-screen overflow-x-hidden antialiased ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
       <div
-        className={`fixed inset-0 z-0 pointer-events-none ${isLight ? 'bg-[#f7f3ea]' : 'bg-[#090b0e]'}`}
+        className={`fixed inset-0 z-0 pointer-events-none ${isLight ? 'bg-[#f5f7fb]' : 'bg-[#090b0e]'}`}
         style={{
           backgroundImage: isLight
             ? `
-              radial-gradient(circle at 12% 15%, rgba(226,149,71,0.32) 0%, rgba(226,149,71,0.12) 34%, transparent 70%),
-              radial-gradient(circle at 45% 10%, rgba(234,179,8,0.2) 0%, rgba(234,179,8,0.08) 40%, transparent 75%),
-              radial-gradient(circle at 85% 25%, rgba(217,70,239,0.12) 0%, rgba(139,92,246,0.05) 35%, transparent 75%),
-              linear-gradient(180deg, rgba(255,251,242,0.25) 0%, rgba(248,244,236,0.86) 58%, rgba(247,243,234,0.98) 100%)`
+              radial-gradient(circle at 8% 10%, rgba(245,158,11,0.16) 0%, rgba(245,158,11,0.055) 34%, transparent 68%),
+              radial-gradient(circle at 54% 0%, rgba(14,165,233,0.13) 0%, rgba(14,165,233,0.045) 38%, transparent 72%),
+              radial-gradient(circle at 88% 22%, rgba(244,114,182,0.1) 0%, rgba(244,114,182,0.035) 36%, transparent 76%),
+              linear-gradient(180deg, rgba(250,252,255,0.96) 0%, rgba(244,247,251,0.96) 54%, rgba(239,243,248,0.98) 100%)`
             : `
               radial-gradient(circle at 12% 15%, rgba(226,149,71,0.28) 0%, rgba(226,149,71,0.08) 35%, transparent 70%),
               radial-gradient(circle at 45% 10%, rgba(234,179,8,0.16) 0%, rgba(234,179,8,0.04) 40%, transparent 75%),
@@ -193,7 +204,7 @@ export default function WorkspaceDashboard() {
                 </div>
                 <div className="mt-3 flex items-center justify-between border-t border-white/10 pt-2">
                   <span className="sidebar-role rounded border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 font-mono text-[9px] font-black uppercase text-amber-400">
-                    {session.user.role}
+                    {session.user.grade}
                   </span>
                   <span className="font-mono text-[9px] uppercase text-emerald-400">online</span>
                 </div>
@@ -201,19 +212,19 @@ export default function WorkspaceDashboard() {
 
               <div className="min-h-0 flex-1 space-y-1 overflow-hidden">
                 <span className="mb-2 block px-2 text-[9px] font-black uppercase tracking-widest text-slate-500">Workspace</span>
-                {NAV_ITEMS.map(({ key, icon, label, sub }) => (
+                {visibleNavItems.map(({ key, icon, label, sub }) => (
                   <button
                     key={key}
                     onClick={() => setCurrentTab(key)}
                     className={`group flex w-full items-center gap-3 rounded-xl px-3 py-1.5 text-left transition-all ${
-                      currentTab === key
+                      activeTab === key
                         ? 'border border-amber-500/30 bg-amber-500/12 text-white shadow-lg shadow-amber-950/15'
                         : 'border border-transparent text-slate-400 hover:border-white/10 hover:bg-white/[0.035] hover:text-slate-100'
                     }`}
                   >
                     <span
                       className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border ${
-                        currentTab === key
+                        activeTab === key
                           ? 'border-amber-500/40 bg-amber-500 text-black'
                           : 'border-white/10 bg-[#111720] text-slate-500 group-hover:text-slate-200'
                       }`}
@@ -264,14 +275,14 @@ export default function WorkspaceDashboard() {
             </div>
 
             <div className="workspace-content min-w-0 pb-10">
-              {currentTab === 'dashboard' && <OverviewDashboard {...sharedProps} />}
-              {currentTab === 'clients' && <ClientManagement {...sharedProps} />}
-              {currentTab === 'services' && <ServicesManagement {...sharedProps} />}
-              {currentTab === 'internal' && <InternalManagement {...sharedProps} />}
-              {currentTab === 'campaigns' && <CampaignOperations {...sharedProps} />}
-              {currentTab === 'lark' && <LarkIntegration {...sharedProps} />}
-              {currentTab === 'quotation' && <QuotationBuilder {...sharedProps} />}
-              {currentTab === 'claims' && <ClaimsLedger {...sharedProps} />}
+              {activeTab === 'dashboard' && <OverviewDashboard {...sharedProps} />}
+              {activeTab === 'clients' && <ClientManagement {...sharedProps} />}
+              {activeTab === 'services' && <ServicesManagement {...sharedProps} />}
+              {activeTab === 'internal' && <InternalManagement {...sharedProps} />}
+              {activeTab === 'campaigns' && <CampaignOperations {...sharedProps} />}
+              {activeTab === 'lark' && <LarkIntegration {...sharedProps} />}
+              {activeTab === 'quotation' && <QuotationBuilder {...sharedProps} />}
+              {activeTab === 'claims' && <ClaimsLedger {...sharedProps} />}
             </div>
           </main>
         </div>

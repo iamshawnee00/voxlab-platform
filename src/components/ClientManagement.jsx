@@ -17,7 +17,8 @@ const GRADIENTS = [
   'from-[#8B5CF6] to-[#D946EF]',
 ];
 
-export default function ClientManagement({ clients, setClients, triggerToast }) {
+export default function ClientManagement({ clients, setClients, access, triggerToast }) {
+  const canEditClients = access?.clients?.edit;
   const [name,     setName]     = useState('');
   const [rep,      setRep]      = useState('');
   const [budget,   setBudget]   = useState('');
@@ -52,9 +53,11 @@ export default function ClientManagement({ clients, setClients, triggerToast }) 
           <h2 className="text-xl font-black uppercase text-white tracking-wider">CLIENT PORTFOLIO</h2>
           <p className="text-xs text-slate-400 mt-1">Manage partner brand accounts and their workspace records.</p>
         </div>
-        <button onClick={() => setModalOpen(true)} className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-black px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors">
-          <PlusIcon /> Add Client
-        </button>
+        {canEditClients && (
+          <button onClick={() => setModalOpen(true)} className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-black px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors">
+            <PlusIcon /> Add Client
+          </button>
+        )}
       </div>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} eyebrow="Client Management" title="Add Client">
