@@ -171,6 +171,12 @@ body {
   color: #92400e !important;
 }
 
+.theme-light .sidebar-profile-card {
+  border-color: rgba(15, 23, 42, 0.2) !important;
+  background-color: rgba(255, 255, 255, 0.42) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45), 0 10px 24px rgba(94, 72, 38, 0.08);
+}
+
 .theme-light .view-switcher {
   background-color: rgba(255, 255, 255, 0.7) !important;
   border-color: rgba(15, 23, 42, 0.14) !important;
@@ -206,6 +212,17 @@ body {
   padding: 0 !important;
 }
 
+.overview-section-header,
+.theme-light .overview-section-header {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.theme-light .overview-section-header::before,
+.theme-light .overview-section-header::after {
+  display: none !important;
+}
+
 .theme-light .overview-section-title {
   color: #111827 !important;
 }
@@ -233,6 +250,78 @@ body {
 .theme-light .modal-panel [class*="text-slate-400"],
 .theme-light .modal-panel [class*="text-slate-500"] {
   color: #64748b !important;
+}
+
+.claims-calendar-panel,
+.claims-analysis-panel,
+.claims-table-panel {
+  background-image: none !important;
+}
+
+.theme-light .claims-calendar-panel,
+.theme-light .claims-analysis-panel,
+.theme-light .claims-table-panel {
+  background-color: rgba(255, 252, 246, 0.82) !important;
+  background-image: none !important;
+  box-shadow: 0 16px 38px rgba(94, 72, 38, 0.1) !important;
+}
+
+.theme-light .claims-calendar-weekdays,
+.theme-light .claims-filter-row {
+  background: rgba(255, 255, 255, 0.38) !important;
+  box-shadow: none !important;
+}
+
+.claims-calendar-cell {
+  background-image: none !important;
+}
+
+.theme-light .claims-calendar-cell {
+  background: rgba(255, 252, 246, 0.18) !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+
+.theme-light .claims-calendar-cell:hover {
+  background: rgba(245, 158, 11, 0.08) !important;
+}
+
+.theme-light .claims-calendar-cell:disabled {
+  background: rgba(255, 255, 255, 0.18) !important;
+}
+
+.theme-light .claims-calendar-claim {
+  background: rgba(255, 255, 255, 0.72) !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+  box-shadow: 0 8px 18px rgba(94, 72, 38, 0.08);
+}
+
+.theme-light .currency-mix-panel {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.theme-light .claims-table-panel table,
+.theme-light .claims-table-panel thead,
+.theme-light .claims-table-panel tbody,
+.theme-light .claims-table-panel tr,
+.theme-light .claims-table-panel td,
+.theme-light .claims-table-panel th {
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+.theme-light .claims-table-panel tbody tr {
+  background-color: rgba(255, 252, 246, 0.34) !important;
+}
+
+.theme-light .claims-table-panel tbody tr:hover {
+  background-color: rgba(245, 158, 11, 0.06) !important;
+}
+
+.claims-filter-input {
+  min-width: 112px;
+  padding: 0.35rem 0.5rem;
+  font-size: 10px;
 }
 
 .workspace-content {

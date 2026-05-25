@@ -169,8 +169,8 @@ export default function WorkspaceDashboard() {
       <div className="relative z-10 min-h-screen w-full px-4 py-4 sm:px-5 lg:px-6 xl:px-8">
         <div className="min-h-[calc(100vh-2rem)]">
           <aside className="mb-5 lg:fixed lg:left-6 lg:top-4 lg:bottom-4 lg:z-30 lg:mb-0 lg:w-[280px] xl:left-8 xl:w-[300px]">
-            <div className="platform-sidebar flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#080B10]/82 p-4 shadow-2xl shadow-black/35 backdrop-blur-xl">
-              <div className="mb-3">
+            <div className="platform-sidebar flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#080B10]/82 p-3 shadow-2xl shadow-black/35 backdrop-blur-xl">
+              <div className="mb-3 shrink-0">
                 <img
                   src={isLight ? '/voxlab-logo-black.png' : '/voxlab-logo-white.png'}
                   alt="VOXLAB"
@@ -181,7 +181,7 @@ export default function WorkspaceDashboard() {
                 </span>
               </div>
 
-              <div className="mb-3 rounded-xl border border-white/10 bg-white/[0.035] p-3">
+              <div className="sidebar-profile-card mb-3 shrink-0 rounded-xl border border-white/10 bg-white/[0.035] p-3">
                 <div className="flex items-center space-x-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-600 text-xs font-black text-black shadow-lg shadow-amber-950/40">
                     {session.user.full_name.charAt(0)}
@@ -199,20 +199,20 @@ export default function WorkspaceDashboard() {
                 </div>
               </div>
 
-              <div className="min-h-0 flex-1 space-y-1">
+              <div className="min-h-0 flex-1 space-y-1 overflow-hidden">
                 <span className="mb-2 block px-2 text-[9px] font-black uppercase tracking-widest text-slate-500">Workspace</span>
                 {NAV_ITEMS.map(({ key, icon, label, sub }) => (
                   <button
                     key={key}
                     onClick={() => setCurrentTab(key)}
-                    className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-all ${
+                    className={`group flex w-full items-center gap-3 rounded-xl px-3 py-1.5 text-left transition-all ${
                       currentTab === key
                         ? 'border border-amber-500/30 bg-amber-500/12 text-white shadow-lg shadow-amber-950/15'
                         : 'border border-transparent text-slate-400 hover:border-white/10 hover:bg-white/[0.035] hover:text-slate-100'
                     }`}
                   >
                     <span
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${
+                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border ${
                         currentTab === key
                           ? 'border-amber-500/40 bg-amber-500 text-black'
                           : 'border-white/10 bg-[#111720] text-slate-500 group-hover:text-slate-200'
@@ -221,21 +221,29 @@ export default function WorkspaceDashboard() {
                       <NavIcon name={icon} />
                     </span>
                     <span className="min-w-0">
-                      <span className="block truncate text-xs font-bold tracking-wide">{label}</span>
+                      <span className="block truncate text-[11px] font-bold tracking-wide">{label}</span>
                       <span className="mt-0.5 block truncate text-[10px] font-medium text-slate-500">{sub}</span>
                     </span>
                   </button>
                 ))}
               </div>
 
-              <div className="mt-3 border-t border-white/10 pt-3">
+              <div className="mt-auto shrink-0 border-t border-white/10 pt-3">
                 <button
                   onClick={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))}
                   className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2.5 text-xs font-bold uppercase tracking-wide text-slate-300 transition-all hover:border-amber-500/30 hover:text-white"
                 >
                   <span>{isLight ? 'Light Mode' : 'Dark Mode'}</span>
-                  <span className="relative h-5 w-10 rounded-full border border-white/10 bg-black/30">
-                    <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-amber-500 transition-transform ${isLight ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                  <span className={`relative h-5 w-10 rounded-full border transition-colors ${
+                    isLight
+                      ? 'border-slate-300 bg-white'
+                      : 'border-amber-500/45 bg-[#111827]'
+                  }`}>
+                    <span className={`absolute left-0.5 top-0.5 h-4 w-4 rounded-full transition-transform ${
+                      isLight
+                        ? 'translate-x-0 bg-slate-800'
+                        : 'translate-x-5 bg-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.65)]'
+                    }`} />
                   </span>
                 </button>
               </div>

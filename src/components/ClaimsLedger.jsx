@@ -83,7 +83,14 @@ export default function ClaimsLedger({ clients, campaigns, claims, setClaims, se
     attachment_name: '',
     conversion_attachment: '',
   });
-  const [filter, setFilter] = useState('All');
+  const [tableFilters, setTableFilters] = useState({
+    claim: '',
+    client: '',
+    category: '',
+    currency: '',
+    date: '',
+    status: '',
+  });
   const [selectedMonth, setSelectedMonth] = useState('2026-05');
   const [selectedDate, setSelectedDate] = useState('');
   const [syncing, setSyncing] = useState(false);
@@ -96,16 +103,29 @@ export default function ClaimsLedger({ clients, campaigns, claims, setClaims, se
 
   const filteredClaims = useMemo(() => {
     return claims.filter((claim) => {
-      const matchesTab =
-        filter === 'All' ||
-        (filter === 'Pending' && !claim.sheet_logged) ||
-        claim.category === filter ||
-        claim.type === filter;
+      const client = clients.find((item) => item.id === claim.client_id);
+      const project = campaigns.find((item) => item.id === claim.project_id);
+      const status = claim.sheet_logged ? 'Synced' : 'Pending';
+      const q = tableFilters.claim.toLowerCase();
+      const matchesClaim =
+        !q ||
+        claim.claim_number.toLowerCase().includes(q) ||
+        claim.item_description.toLowerCase().includes(q);
+      const matchesClient =
+        !tableFilters.client ||
+        claim.client_id === tableFilters.client ||
+        claim.project_id === tableFilters.client ||
+        client?.name.toLowerCase().includes(tableFilters.client.toLowerCase()) ||
+        project?.name.toLowerCase().includes(tableFilters.client.toLowerCase());
+      const matchesCategory = !tableFilters.category || claim.category === tableFilters.category || claim.type === tableFilters.category;
+      const matchesCurrency = !tableFilters.currency || claim.currency === tableFilters.currency;
+      const matchesStatus = !tableFilters.status || status === tableFilters.status;
+      const matchesFilterDate = !tableFilters.date || claim.transaction_date === tableFilters.date;
       const matchesMonth = monthKey(claim.transaction_date) === selectedMonth;
       const matchesDate = !selectedDate || claim.transaction_date === selectedDate;
-      return matchesTab && matchesMonth && matchesDate;
+      return matchesClaim && matchesClient && matchesCategory && matchesCurrency && matchesStatus && matchesFilterDate && matchesMonth && matchesDate;
     });
-  }, [claims, filter, selectedDate, selectedMonth]);
+  }, [campaigns, claims, clients, selectedDate, selectedMonth, tableFilters]);
 
   const monthlyClaims = useMemo(
     () => claims.filter((claim) => monthKey(claim.transaction_date) === selectedMonth),
@@ -161,6 +181,10 @@ export default function ClaimsLedger({ clients, campaigns, claims, setClaims, se
       }
       return next;
     });
+  };
+
+  const updateTableFilter = (field, value) => {
+    setTableFilters((current) => ({ ...current, [field]: value }));
   };
 
   const setAttachmentName = (field, fileList) => {
@@ -348,8 +372,8 @@ export default function ClaimsLedger({ clients, campaigns, claims, setClaims, se
             <AnalyticsCard label="Currencies" value={analytics.currencyTotals.map((item) => item.currency).join(' / ') || '-'} sub="Original currencies used" />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-7 bg-[#0B0F15]/85 border border-[#1A2430]/60 rounded-xl overflow-hidden backdrop-blur-md">
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,7fr)_minmax(320px,3fr)] gap-6">
+            <div className="claims-calendar-panel bg-[#0B0F15]/85 border border-[#1A2430]/60 rounded-xl overflow-hidden backdrop-blur-md">
               <div className="p-4 border-b border-[#1C2634] flex items-center justify-between gap-3">
                 <div>
                   <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black">Claims Calendar</p>
@@ -358,19 +382,19 @@ export default function ClaimsLedger({ clients, campaigns, claims, setClaims, se
                 <input type="month" value={selectedMonth} onChange={(event) => { setSelectedMonth(event.target.value); setSelectedDate(''); }} className="field max-w-40" />
               </div>
 
-              <div className="grid grid-cols-7 border-b border-[#1C2634] text-center text-[9px] uppercase text-slate-500 font-bold">
+              <div className="claims-calendar-weekdays grid grid-cols-7 border-b border-[#1C2634] text-center text-[9px] uppercase text-slate-500 font-bold">
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
                   <div key={day} className="py-2 border-r border-[#1C2634] last:border-r-0">{day}</div>
                 ))}
               </div>
 
-              <div className="grid grid-cols-7">
+              <div className="claims-calendar-grid grid grid-cols-7">
                 {calendarDays.map((cell, index) => (
                   <button
                     key={cell?.date || `empty-${index}`}
                     disabled={!cell}
                     onClick={() => setSelectedDate((current) => current === cell.date ? '' : cell.date)}
-                    className={`min-h-24 border-r border-b border-[#1C2634] last:border-r-0 p-2 text-left transition-colors disabled:bg-[#080B10]/40 ${
+                    className={`claims-calendar-cell min-h-28 border-r border-b border-[#1C2634] last:border-r-0 p-2 text-left transition-colors ${
                       cell?.date === selectedDate ? 'bg-amber-500/10' : 'hover:bg-white/[0.025]'
                     }`}
                   >
@@ -384,7 +408,7 @@ export default function ClaimsLedger({ clients, campaigns, claims, setClaims, se
                         </div>
                         <div className="mt-2 space-y-1">
                           {cell.claims.slice(0, 2).map((claim) => (
-                            <div key={claim.id} className="rounded bg-[#121820]/80 border border-[#212C3B]/60 px-1.5 py-1">
+                            <div key={claim.id} className="claims-calendar-claim rounded bg-[#121820]/80 border border-[#212C3B]/60 px-1.5 py-1">
                               <p className="text-[9px] text-white truncate">{claim.claim_number}</p>
                               <p className="text-[9px] text-amber-400 font-mono truncate">{fmt(claim.amount_myr || claim.amount)}</p>
                             </div>
@@ -400,7 +424,7 @@ export default function ClaimsLedger({ clients, campaigns, claims, setClaims, se
               </div>
             </div>
 
-            <div className="lg:col-span-5 bg-[#0B0F15]/85 border border-[#1A2430]/60 rounded-xl p-5 backdrop-blur-md space-y-5">
+            <div className="claims-analysis-panel bg-[#0B0F15]/85 border border-[#1A2430]/60 rounded-xl p-5 backdrop-blur-md space-y-5">
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-3">Category Analysis</p>
                 <div className="space-y-3">
@@ -426,7 +450,7 @@ export default function ClaimsLedger({ clients, campaigns, claims, setClaims, se
                 </div>
               </div>
 
-              <div className="border-t border-[#1C2634] pt-5">
+              <div className="currency-mix-panel border-t border-[#1C2634] pt-5">
                 <p className="text-[10px] uppercase tracking-widest text-slate-500 font-black mb-3">Currency Mix</p>
                 <div className="flex gap-2 flex-wrap">
                   {analytics.currencyTotals.map((item) => (
@@ -440,28 +464,13 @@ export default function ClaimsLedger({ clients, campaigns, claims, setClaims, se
           </div>
 
           <div className="space-y-3">
-            <div className="flex gap-1.5 flex-wrap">
-              {['All', 'Pending', 'Staff Expense', 'Client Pass-through', ...CLAIM_CATEGORIES].map((item) => (
-                <button
-                  key={item}
-                  onClick={() => setFilter(item)}
-                  className={`text-[10px] font-bold uppercase px-3 py-1 rounded border transition-all ${
-                    filter === item
-                      ? 'bg-amber-500/15 border-amber-500/40 text-amber-400'
-                      : 'border-[#212C3B]/60 text-slate-500 hover:text-slate-300'
-                  }`}
-                >
-                  {item}
-                </button>
-              ))}
-              {selectedDate && (
-                <button onClick={() => setSelectedDate('')} className="text-[10px] font-bold uppercase px-3 py-1 rounded border border-rose-500/30 text-rose-400">
-                  Clear Date: {selectedDate}
-                </button>
-              )}
-            </div>
+            {selectedDate && (
+              <button onClick={() => setSelectedDate('')} className="text-[10px] font-bold uppercase px-3 py-1 rounded border border-rose-500/30 text-rose-400">
+                Clear Date: {selectedDate}
+              </button>
+            )}
 
-            <div className="bg-[#0B0F15]/85 border border-[#1A2430]/60 rounded-xl overflow-hidden backdrop-blur-md">
+            <div className="claims-table-panel bg-[#0B0F15]/85 border border-[#1A2430]/60 rounded-xl overflow-hidden backdrop-blur-md">
               <table className="w-full text-left text-xs">
                 <thead>
                   <tr className="border-b border-[#1C2634] bg-[#121820]/40 text-[9px] uppercase text-slate-500 tracking-widest font-bold">
@@ -473,6 +482,42 @@ export default function ClaimsLedger({ clients, campaigns, claims, setClaims, se
                     <th className="py-3 px-4">Attachments</th>
                     <th className="py-3 px-4">Date</th>
                     <th className="py-3 px-4 text-right">Status</th>
+                  </tr>
+                  <tr className="claims-filter-row border-b border-[#1C2634] bg-[#0D1219]/70">
+                    <th className="py-2 px-4">
+                      <input value={tableFilters.claim} onChange={(event) => updateTableFilter('claim', event.target.value)} placeholder="Search..." className="claims-filter-input field" />
+                    </th>
+                    <th className="py-2 px-4">
+                      <select value={tableFilters.client} onChange={(event) => updateTableFilter('client', event.target.value)} className="claims-filter-input field">
+                        <option value="">All</option>
+                        {clients.map((client) => <option key={client.id} value={client.id}>{client.name}</option>)}
+                      </select>
+                    </th>
+                    <th className="py-2 px-4">
+                      <select value={tableFilters.category} onChange={(event) => updateTableFilter('category', event.target.value)} className="claims-filter-input field">
+                        <option value="">All</option>
+                        {CLAIM_TYPES.map((type) => <option key={type}>{type}</option>)}
+                        {CLAIM_CATEGORIES.map((category) => <option key={category}>{category}</option>)}
+                      </select>
+                    </th>
+                    <th className="py-2 px-4">
+                      <select value={tableFilters.currency} onChange={(event) => updateTableFilter('currency', event.target.value)} className="claims-filter-input field">
+                        <option value="">All</option>
+                        {CURRENCIES.map((currency) => <option key={currency}>{currency}</option>)}
+                      </select>
+                    </th>
+                    <th className="py-2 px-4" />
+                    <th className="py-2 px-4" />
+                    <th className="py-2 px-4">
+                      <input type="date" value={tableFilters.date} onChange={(event) => updateTableFilter('date', event.target.value)} className="claims-filter-input field" />
+                    </th>
+                    <th className="py-2 px-4">
+                      <select value={tableFilters.status} onChange={(event) => updateTableFilter('status', event.target.value)} className="claims-filter-input field">
+                        <option value="">All</option>
+                        <option>Synced</option>
+                        <option>Pending</option>
+                      </select>
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#151D27] text-slate-300">

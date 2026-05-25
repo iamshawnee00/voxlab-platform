@@ -81,7 +81,7 @@ export default function OverviewDashboard({ clients, campaigns, quotes, claims, 
 
         {/* Upcoming deadlines */}
         <div className="bg-[#0B0F15]/85 border border-[#1A2430]/60 rounded-xl p-5 backdrop-blur-md">
-          <div className="flex justify-between items-center border-b border-[#1C2634] pb-3 mb-4">
+          <div className="overview-section-header flex justify-between items-center border-b border-[#1C2634] pb-3 mb-4">
             <span className="overview-section-title text-[10px] font-black uppercase tracking-wider text-white">UPCOMING DEADLINES (7 DAYS)</span>
             <span className="text-[10px] text-amber-500 font-bold font-mono">{upcoming.length} DUE</span>
           </div>
@@ -110,7 +110,7 @@ export default function OverviewDashboard({ clients, campaigns, quotes, claims, 
 
         {/* Team capacity */}
         <div className="bg-[#0B0F15]/85 border border-[#1A2430]/60 rounded-xl p-5 backdrop-blur-md">
-          <div className="flex justify-between items-center border-b border-[#1C2634] pb-3 mb-4">
+          <div className="overview-section-header flex justify-between items-center border-b border-[#1C2634] pb-3 mb-4">
             <span className="overview-section-title text-[10px] font-black uppercase tracking-wider text-white">TEAM CAPACITY</span>
             <span className="text-[10px] text-slate-500 font-mono uppercase">Bandwidth %</span>
           </div>
@@ -141,7 +141,7 @@ export default function OverviewDashboard({ clients, campaigns, quotes, claims, 
 
       {/* Active campaign progress */}
       <div className="bg-[#0B0F15]/85 border border-[#1A2430]/60 rounded-xl p-5 backdrop-blur-md">
-        <div className="flex justify-between items-center border-b border-[#1C2634] pb-3 mb-4">
+        <div className="overview-section-header flex justify-between items-center border-b border-[#1C2634] pb-3 mb-4">
           <span className="overview-section-title text-[10px] font-black uppercase tracking-wider text-white">ACTIVE CAMPAIGN PROGRESS</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
