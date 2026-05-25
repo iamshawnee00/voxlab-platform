@@ -48,6 +48,8 @@ export default function LoginPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [theme, setTheme] = useState('dark');
+  const isLight = theme === 'light';
 
   const triggerToast = (msg) => {
     setToastMessage(msg);
@@ -108,8 +110,30 @@ export default function LoginPage() {
   };
 
   return (
-    // Note: No background colors here. Global gradient & grain are handled by layout.js
-    <div className="min-h-screen flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative z-10">
+    <div className={`theme-${theme} min-h-screen flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative z-10 ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
+      <div
+        className={`fixed inset-0 z-0 pointer-events-none ${isLight ? 'bg-[#f7f3ea]' : 'bg-[#090b0e]'}`}
+        style={{
+          backgroundImage: isLight
+            ? `
+              radial-gradient(circle at 12% 15%, rgba(226,149,71,0.32) 0%, rgba(226,149,71,0.12) 34%, transparent 70%),
+              radial-gradient(circle at 45% 10%, rgba(234,179,8,0.2) 0%, rgba(234,179,8,0.08) 40%, transparent 75%),
+              radial-gradient(circle at 85% 25%, rgba(217,70,239,0.12) 0%, rgba(139,92,246,0.05) 35%, transparent 75%),
+              linear-gradient(180deg, rgba(255,251,242,0.25) 0%, rgba(248,244,236,0.86) 58%, rgba(247,243,234,0.98) 100%)`
+            : `
+              radial-gradient(circle at 12% 15%, rgba(226,149,71,0.28) 0%, rgba(226,149,71,0.08) 35%, transparent 70%),
+              radial-gradient(circle at 45% 10%, rgba(234,179,8,0.16) 0%, rgba(234,179,8,0.04) 40%, transparent 75%),
+              radial-gradient(circle at 85% 25%, rgba(217,70,239,0.14) 0%, rgba(139,92,246,0.04) 35%, transparent 75%),
+              linear-gradient(180deg, rgba(9,11,14,0.2) 0%, rgba(9,11,14,0.78) 58%, rgba(9,11,14,0.96) 100%)`,
+        }}
+      />
+      <button
+        type="button"
+        onClick={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))}
+        className="fixed right-5 top-5 z-20 rounded-xl border border-white/10 bg-[#0B0F15]/70 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-slate-300 backdrop-blur-xl transition-colors hover:text-white"
+      >
+        {isLight ? 'Light Mode' : 'Dark Mode'}
+      </button>
       
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center space-x-3 bg-[#0F1621] border border-amber-500/30 text-amber-100 px-4 py-3 rounded-xl shadow-2xl animate-fade-in-up">
@@ -120,15 +144,11 @@ export default function LoginPage() {
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center relative z-10">
         <div className="mb-6 flex justify-center">
-          {/* Custom SVG Geometric Logo */}
-          <svg viewBox="0 0 350 75" className="h-8 w-auto text-white fill-current" xmlns="http://www.w3.org/2000/svg">
-            <path d="M 10 20 L 28 58 L 38 58 L 56 20 L 44 20 L 33 46 L 22 20 Z" />
-            <path fillRule="evenodd" d="M 68 20 L 102 20 C 111 20, 115 24, 115 32 L 115 46 C 115 54, 111 58, 102 58 L 68 58 C 59 58, 55 54, 55 46 L 55 32 C 55 24, 59 20, 68 20 Z M 69 31 L 69 47 L 101 47 L 101 31 Z" />
-            <path d="M 125 20 L 138 20 L 151 38 L 164 20 L 177 20 L 158 44 L 177 58 L 164 58 L 151 40 L 138 58 L 125 58 L 144 44 Z" />
-            <path d="M 187 10 L 197 10 L 197 58 L 187 58 Z" />
-            <path d="M 207 32 C 207 24, 211 20, 220 20 L 244 20 L 244 58 L 235 58 L 235 52 C 232 56, 228 58, 222 58 C 213 58, 207 54, 207 46 Z M 218 31 L 218 47 C 218 51, 220 53, 225 53 L 234 53 L 234 31 Z" />
-            <path d="M 254 10 L 264 10 L 264 30 C 267 24, 272 20, 280 20 C 289 20, 293 24, 293 32 L 293 46 C 293 54, 289 58, 280 58 L 254 58 Z M 264 31 L 264 53 L 280 53 C 285 53, 287 51, 287 46 L 287 32 C 287 27, 285 25, 280 25 Z" />
-          </svg>
+          <img
+            src={isLight ? '/voxlab-logo-black.png' : '/voxlab-logo-white.png'}
+            alt="VOXLAB"
+            className="h-8 w-auto object-contain"
+          />
         </div>
         <h2 className="text-lg font-bold tracking-widest text-slate-400 uppercase">
           Unified Platform Gateway
