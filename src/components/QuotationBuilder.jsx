@@ -639,7 +639,6 @@ export default function QuotationBuilder({ clients, quotes, setQuotes, triggerTo
           )}
         </div>
       </div>
-      </Modal>
     );
   }
 
