@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import OverviewDashboard from '@/components/OverviewDashboard';
 import ClientManagement from '@/components/ClientManagement';
 import CampaignOperations from '@/components/CampaignOperations';
@@ -11,6 +12,7 @@ import ServicesManagement from '@/components/ServicesManagement';
 import InternalManagement from '@/components/InternalManagement';
 import { SERVICE_CATALOG } from '@/data/serviceCatalog';
 import { getAccessForGrade } from '@/lib/permissions';
+import { supabase } from '@/lib/supabase';
 
 export const INITIAL_TEAM = [
   { id: 't1', name: 'Alex Mercer', role: 'Creative Director', grade: 'G1 - Lead', date_joined: '2024-01-15', capacity: 85 },
@@ -90,6 +92,7 @@ const NAV_ITEMS = [
 ];
 
 export default function WorkspaceDashboard() {
+  const router = useRouter();
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [theme, setTheme] = useState('dark');
   const [team, setTeam] = useState(INITIAL_TEAM);
@@ -99,19 +102,61 @@ export default function WorkspaceDashboard() {
   const [quotes, setQuotes] = useState(INITIAL_QUOTES);
   const [claims, setClaims] = useState(INITIAL_CLAIMS);
   const [toast, setToast] = useState('');
+  const [session, setSession] = useState(null);
+  const [loadingSession, setLoadingSession] = useState(true);
 
-  const session = {
-    user: {
-      id: 'usr-admin',
-      personnel_id: 't1',
-      email: 'admin@voxlab.co',
-      full_name: 'Alex Mercer',
-      role: 'admin',
-      grade: 'G1 - Lead',
-    },
-  };
+  useEffect(() => {
+    let active = true;
 
-  const access = useMemo(() => getAccessForGrade(session.user.grade), [session.user.grade]);
+    async function loadSession() {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const authSession = sessionData?.session;
+
+      if (!authSession?.user) {
+        router.replace('/login');
+        return;
+      }
+
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('full_name, grade, role, personnel_id, status')
+        .eq('id', authSession.user.id)
+        .single();
+
+      if (!active) return;
+
+      if (profileError || profile?.status === 'disabled') {
+        await supabase.auth.signOut();
+        router.replace('/login');
+        return;
+      }
+
+      setSession({
+        user: {
+          id: authSession.user.id,
+          personnel_id: profile?.personnel_id || authSession.user.id,
+          email: authSession.user.email,
+          full_name: profile?.full_name || authSession.user.email,
+          role: profile?.role || 'staff',
+          grade: profile?.grade || 'External',
+        },
+      });
+      setLoadingSession(false);
+    }
+
+    loadSession();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') router.replace('/login');
+    });
+
+    return () => {
+      active = false;
+      authListener?.subscription?.unsubscribe();
+    };
+  }, [router]);
+
+  const access = useMemo(() => getAccessForGrade(session?.user?.grade), [session?.user?.grade]);
   const visibleNavItems = useMemo(
     () => NAV_ITEMS.filter((item) => access.nav.includes(item.key)),
     [access.nav]
@@ -121,6 +166,11 @@ export default function WorkspaceDashboard() {
   const triggerToast = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(''), 4000);
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.replace('/login');
   };
 
   const sharedProps = {
@@ -143,6 +193,17 @@ export default function WorkspaceDashboard() {
 
   const activePanel = NAV_ITEMS.find((item) => item.key === activeTab) ?? NAV_ITEMS[0];
   const isLight = theme === 'light';
+
+  if (loadingSession) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#090b0e] text-slate-400">
+        <div className="text-center">
+          <img src="/voxlab-logo-white.png" alt="VOXLAB" className="mx-auto h-8 w-auto object-contain" />
+          <p className="mt-4 text-[10px] font-black uppercase tracking-[0.28em]">Loading workspace access</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`theme-${theme} relative min-h-screen overflow-x-hidden antialiased ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
@@ -240,6 +301,20 @@ export default function WorkspaceDashboard() {
               </div>
 
               <div className="mt-auto shrink-0 border-t border-white/10 pt-3">
+                <button
+                  onClick={() => router.push('/account/password')}
+                  className="mb-2 flex w-full items-center justify-between rounded-xl border border-white/10 bg-white/[0.025] px-3 py-2 text-xs font-bold uppercase tracking-wide text-slate-400 transition-all hover:border-amber-500/30 hover:text-white"
+                >
+                  <span>Password</span>
+                  <span className="font-mono text-[9px] text-slate-500">Change</span>
+                </button>
+                <button
+                  onClick={handleSignOut}
+                  className="mb-2 flex w-full items-center justify-between rounded-xl border border-white/10 bg-white/[0.025] px-3 py-2 text-xs font-bold uppercase tracking-wide text-slate-400 transition-all hover:border-rose-500/30 hover:text-white"
+                >
+                  <span>Sign Out</span>
+                  <span className="font-mono text-[9px] text-slate-500">Exit</span>
+                </button>
                 <button
                   onClick={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))}
                   className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2.5 text-xs font-bold uppercase tracking-wide text-slate-300 transition-all hover:border-amber-500/30 hover:text-white"
